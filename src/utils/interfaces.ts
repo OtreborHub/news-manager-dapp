@@ -22,7 +22,7 @@ interface News {
     title: string;
     expireDate: string;
     validators: string[];
-    validationsRequired: string;
+    validationsRequired: number;
     valid: boolean; 
 }
 

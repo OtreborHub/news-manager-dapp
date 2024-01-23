@@ -1,8 +1,23 @@
 .main-div {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+.validator-news {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-news {
+  display: flex;
+  flex-direction: row;
 }

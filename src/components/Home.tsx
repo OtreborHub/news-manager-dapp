@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import '../styles/home.css';
-import getContractInstance, { getNews, isUserValidator } from "../utils/contractBridge";
+import getContractInstance, { getAllNews, getNews, isUserValidator } from "../utils/contractBridge";
 import { HomeProps, News } from "../utils/interfaces";
 import NewsCard from "./NewsCard";
 
 export default function Home({signer, provider}: HomeProps) {
-    const NEWS_CAP = 5
     
-    const [newsToEvaluate, setNewsToEvaluate] = useState<News[]>([]);
+    const [validNews, setValidNews] = useState<News[]>([]);
+    const [invalidNews, setInvalidNews] = useState<News[]>([]);
     const [isValidator, setIsValidator] = useState<boolean>();
     
     useEffect(() => {
         init();
-        getFirstNews();
-        // getLastNews();
+        getLastNews();
     }, [])
 
     async function init(){
@@ -23,57 +22,57 @@ export default function Home({signer, provider}: HomeProps) {
         });
     }
 
-    async function getFirstNews(){
-        var newsList: News[] = []; 
-        await getNews(1).then((result) => {
-            if(result){
-                var record: News = {
-                    address: result[0],
-                    title: result[1],
-                    expireDate: result[2],
-                    validators: [],
-                    validationsRequired: result[3],
-                    valid: result[4]
-                };
-                newsList.push(record);
-            }
-        });
-        setNewsToEvaluate(newsList);
-    }
-
-    async function getLastNews(){
-        var newsList: News[] = [];
-        for(let i = 0; i < NEWS_CAP; i++){
-            let result = await getNews(i);
-            if(result){
-                var record: News = {
-                    address: result[0],
-                    title: result[1],
-                    expireDate: result[2],
-                    validators: [],
-                    validationsRequired: result[3],
-                    valid: result[4]
-                };
-                newsList.push(record);
-            } else { 
-                break;
-            }
-        }
-        setNewsToEvaluate(newsList);
+    async function getLastNews() {
+        await getAllNews().then((result: News[]) => {
+            let validNews: News[] = []
+            let invalidNews: News[] = []
+            result.map((news: News) => {
+                if(news.valid == true){
+                    validNews.push(news);
+                } else {
+                    invalidNews.push(news);
+                }
+            })
+            setValidNews(validNews);
+            setInvalidNews(invalidNews);
+        })
     }
 
     return (
         <div className="main-div">
-            <div> {isValidator ? "Validatore": "Utente"} </div>
-            {newsToEvaluate.map(el => 
-                <NewsCard 
-                address={el.address} 
-                title={el.title}
-                expireDate={el.expireDate} 
-                validators={[]}
-                validationsRequired={el.validationsRequired}
-                valid={el.valid} />
-            )}
+            <h3> Account {isValidator ? "Validatore": "Utente"} </h3>
+            <div className="news-div" style={{ width: "100%"}}>
+                <div className="validator-news">
+                { isValidator && 
+                    <div className="item">
+                        <h5> Pending News </h5>
+                            {invalidNews.map(el => 
+                                <NewsCard
+                                key={el.address} 
+                                address={el.address} 
+                                title={el.title}
+                                expireDate={el.expireDate} 
+                                validators={[]}
+                                validationsRequired={el.validationsRequired}
+                                valid={el.valid} />
+                            )}
+                    </div>
+                }
+                    <div className="item">
+                    <h5> News released </h5>
+                        {validNews.map(el => 
+                            <NewsCard
+                            key={el.address} 
+                            address={el.address} 
+                            title={el.title}
+                            expireDate={el.expireDate} 
+                            validators={[]}
+                            validationsRequired={el.validationsRequired}
+                            valid={el.valid} />
+                        )}
+                    </div>
+            </div> 
         </div>
+    </div>
     )
 }
